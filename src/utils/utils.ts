@@ -2,6 +2,10 @@ import { Stock } from "../types/types";
 var xirr = require('xirr');
 
 export const calculateXIRRPercentage = (stocks: Stock[]): number => {
+    if (stocks.length === 0) {
+        return 0;
+    }
+
     const xirrArray: { amount: number, when: Date }[] = []
 
     // generate buys

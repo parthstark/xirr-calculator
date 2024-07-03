@@ -1,12 +1,13 @@
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native'
-import React from 'react'
+import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, Animated } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { useColorScheme } from 'nativewind'
 import uuid from 'react-native-uuid';
 import PortfolioHoldingItem from './PortfolioHoldingItem';
 import PortfolioAtGlance from './PortfolioAtGlance';
 import { Stock } from '../types/types';
+import AddNewStockModal from './AddNewStockModal';
 
-const stocks: Stock[] = [
+const teststocks: Stock[] = [
     {
         txId: uuid.v4().toString(),
         name: 'TATAMOTORS',
@@ -33,9 +34,48 @@ const stocks: Stock[] = [
     }
 ]
 
+const myStocks: Stock[] = [
+    {
+        txId: uuid.v4().toString(),
+        name: 'NIFTYBEES',
+        quantity: 300,
+        buyingPrice: 250.30,
+        dateOfPurchase: new Date(2024, 5, 4),
+        currentPrice: 270.23
+    },
+    {
+        txId: uuid.v4().toString(),
+        name: 'MIDCAPETF',
+        quantity: 8000,
+        buyingPrice: 18.62,
+        dateOfPurchase: new Date(2024, 5, 4),
+        currentPrice: 21.29
+    }
+]
+
+const stocks = teststocks;
+
 const PortfolioScreen = () => {
+
+    const { toggleColorScheme } = useColorScheme();
+    const [isAddStockModalVisible, setIsAddStockModalVisible] = useState(false)
+    const openAddStockModal = () => setIsAddStockModalVisible(x => true);
+    const closeAddStockModal = () => setIsAddStockModalVisible(x => false);
+
+    const scaleValue = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.timing(scaleValue, {
+            toValue: isAddStockModalVisible ? 0.95 : 1,
+            duration: 250,
+            useNativeDriver: true,
+        }).start();
+    }, [isAddStockModalVisible]);
+
     const button = (
-        <TouchableOpacity className=' scale-90 flex-row justify-between items-center h-20 border-gray-300 dark:border-gray-500 border-2 border-dashed rounded-full px-5 my-5'>
+        <TouchableOpacity
+            onPress={openAddStockModal}
+            className=' scale-90 flex-row justify-between items-center h-20 border-gray-300 dark:border-gray-500 border-2 border-dashed rounded-full px-5 my-5'>
             <Text className='text-6xl font-extralight text-black dark:text-white'>+</Text>
             <Text className='text-3xl font-extralight text-gray-500 dark:text-gray-50'>Tap to add new stock</Text>
             <Text className='text-transparent text-2xl font-extralight'>+</Text>
@@ -59,37 +99,45 @@ const PortfolioScreen = () => {
         </View>
     )
 
-    const { toggleColorScheme } = useColorScheme();
-
+    const bgStyle = 'flex-1 bg-white dark:bg-slate-900'
     return (
-        <View className='flex-1 bg-white dark:bg-slate-900'>
-            <SafeAreaView className='flex-1'>
-                <View className='flex-row justify-between items-center'>
-                    <Text className='text-5xl font-light m-5 text-black dark:text-white'>
-                        Portfolio
-                    </Text>
-                    <TouchableOpacity onPress={toggleColorScheme}>
-                        <Text className='text-3xl font-light m-5 text-black dark:text-white'>
-                            Φ
+        <View className={bgStyle}>
+            <Animated.View
+                style={{ transform: [{ scale: scaleValue }] }}
+                className={bgStyle}>
+                <SafeAreaView className='flex-1'>
+                    <View className='flex-row justify-between items-center'>
+                        <Text className='text-5xl font-light m-5 text-black dark:text-white'>
+                            Portfolio
                         </Text>
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity onPress={toggleColorScheme}>
+                            <Text className='text-3xl font-light m-5 text-black dark:text-white'>
+                                Φ
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <PortfolioAtGlance stocks={stocks} />
+                    <PortfolioAtGlance stocks={stocks} />
 
-                {titleHeader}
+                    {titleHeader}
 
-                <ScrollView className='px-5'>
+                    <ScrollView className='px-5'>
 
-                    {
-                        stocks.map(stock => {
-                            return <PortfolioHoldingItem stock={stock} key={stock.txId} />
-                        })
-                    }
+                        {
+                            stocks.map(stock => {
+                                return <PortfolioHoldingItem stock={stock} key={stock.txId} />
+                            })
+                        }
 
-                    {button}
-                </ScrollView>
-            </SafeAreaView>
+                        {button}
+                    </ScrollView>
+
+                    <AddNewStockModal
+                        isModalVisible={isAddStockModalVisible}
+                        onRequestClose={closeAddStockModal}
+                    />
+                </SafeAreaView>
+            </Animated.View>
         </View>
     )
 }
