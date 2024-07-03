@@ -12,8 +12,10 @@ const PortfolioAtGlance = ({ stocks }: PortfolioAtGlanceProps) => {
     let investedAmount = 0
     let currentAmount = 0
     stocks.forEach(stock => {
-        investedAmount += (stock.buyingPrice * stock.quantity);
-        currentAmount += (stock.currentPrice * stock.quantity);
+        stock.transactions.forEach(tx => {
+            investedAmount += (tx.buyingPrice * tx.quantity);
+            currentAmount += (stock.currentPrice * tx.quantity);
+        })
     })
     const xirReturn = calculateXIRRPercentage(stocks);
     const absReturn = (currentAmount - investedAmount) / investedAmount * 100;

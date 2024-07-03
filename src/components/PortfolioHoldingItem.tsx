@@ -10,15 +10,23 @@ interface PortfolioHoldingItem {
 
 const PortfolioHoldingItem = ({ stock }: PortfolioHoldingItem) => {
 
-    const displayColor = getTailwindColorClassOnPriceComparison(stock.buyingPrice, stock.currentPrice)
+    let investedAmount = 0
+    let currentAmount = 0
+    let totalQuantity = 0
+    stock.transactions.forEach(tx => {
+        investedAmount += (tx.buyingPrice * tx.quantity);
+        currentAmount += (stock.currentPrice * tx.quantity);
+        totalQuantity += tx.quantity;
+    })
+    const xirReturn = calculateXIRRPercentage([stock]);
+    const absReturn = (currentAmount - investedAmount) / investedAmount * 100;
 
-    const absReturn = (stock.currentPrice - stock.buyingPrice) / stock.buyingPrice * 100;
-    const xirReturn = calculateXIRRPercentage([stock])
-
-    const [buyingPriceInt, buyingPriceDecimal] = splitNumberToIntAndDecimal(stock.buyingPrice)
-    const [currentPriceInt, currentPriceDecimal] = splitNumberToIntAndDecimal(stock.currentPrice)
+    const [investedInt, investedDecimal] = splitNumberToIntAndDecimal(investedAmount)
+    const [currentInt, currentDecimal] = splitNumberToIntAndDecimal(currentAmount)
     const [absReturnInt, absReturnDecimal] = splitNumberToIntAndDecimal(absReturn)
     const [xirReturnInt, xirReturnDecimal] = splitNumberToIntAndDecimal(xirReturn)
+
+    const displayColor = getTailwindColorClassOnPriceComparison(investedAmount, currentAmount);
 
     return (
         <TouchableOpacity className='flex-col mt-5'>
@@ -37,15 +45,15 @@ const PortfolioHoldingItem = ({ stock }: PortfolioHoldingItem) => {
                 </View>
                 <View className='flex-1 flex-col items-end justify-end'>
                     <Text className={'text-lg font-light ' + displayColor}>
-                        {currentPriceInt + '.'}
-                        <Text className='text-sm'>{currentPriceDecimal}</Text>
+                        {currentInt + '.'}
+                        <Text className='text-sm'>{currentDecimal}</Text>
                     </Text>
                 </View>
             </View>
             <View className='flex-row justify-between'>
                 <View className='flex-[1.5] flex-col items-start justify-end'>
                     <Text className='text-base font-light text-gray-500 dark:text-gray-50'>
-                        {stock.quantity}
+                        {totalQuantity}
                     </Text>
                 </View>
                 <View className='flex-1 flex-col items-center justify-end'>
@@ -57,8 +65,8 @@ const PortfolioHoldingItem = ({ stock }: PortfolioHoldingItem) => {
                 </View>
                 <View className='flex-1 flex-col items-end justify-end'>
                     <Text className='text-lg font-light text-gray-500 dark:text-gray-50'>
-                        {buyingPriceInt + '.'}
-                        <Text className='text-sm'>{buyingPriceDecimal}</Text>
+                        {investedInt + '.'}
+                        <Text className='text-sm'>{investedDecimal}</Text>
                     </Text>
                 </View>
             </View>

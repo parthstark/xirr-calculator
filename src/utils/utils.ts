@@ -3,24 +3,28 @@ var xirr = require('xirr');
 
 export const calculateXIRRPercentage = (stocks: Stock[]): number => {
     if (stocks.length === 0) {
-        return 0;
+        return NaN;
     }
 
     const xirrArray: { amount: number, when: Date }[] = []
 
     // generate buys
     stocks.forEach(stock => {
-        xirrArray.push({
-            amount: stock.buyingPrice * stock.quantity * -1,
-            when: stock.dateOfPurchase
+        stock.transactions.forEach(tx => {
+            xirrArray.push({
+                amount: tx.buyingPrice * tx.quantity * -1,
+                when: tx.dateOfPurchase
+            })
         })
     });
 
     // generate current value
     stocks.forEach(stock => {
-        xirrArray.push({
-            amount: stock.currentPrice * stock.quantity,
-            when: new Date()
+        stock.transactions.forEach(tx => {
+            xirrArray.push({
+                amount: stock.currentPrice * tx.quantity,
+                when: new Date()
+            })
         })
     });
 

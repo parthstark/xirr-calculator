@@ -9,51 +9,69 @@ import AddNewStockModal from './AddNewStockModal';
 
 const teststocks: Stock[] = [
     {
-        txId: uuid.v4().toString(),
         name: 'TATAMOTORS',
-        quantity: 1000,
-        buyingPrice: 195.61884,
         currentPrice: 302.2399343,
-        dateOfPurchase: new Date(2021, 12, 23),
+        transactions: [{
+            txId: uuid.v4(),
+            quantity: 1000,
+            buyingPrice: 195.61884,
+            dateOfPurchase: new Date(2021, 12, 23),
+        },]
     },
     {
-        txId: uuid.v4().toString(),
         name: 'PAYTM',
-        quantity: 20,
-        buyingPrice: 2567,
         currentPrice: 890.44,
-        dateOfPurchase: new Date(2023, 4, 4),
+        transactions: [{
+            txId: uuid.v4(),
+            quantity: 20,
+            buyingPrice: 2567,
+            dateOfPurchase: new Date(2023, 4, 4),
+        },]
     },
     {
-        txId: uuid.v4().toString(),
         name: 'INFY',
-        quantity: 1250,
-        buyingPrice: 499.01,
         currentPrice: 1510.235,
-        dateOfPurchase: new Date(2020, 28, 3),
+        transactions: [{
+            txId: uuid.v4(),
+            quantity: 1250,
+            buyingPrice: 499.01,
+            dateOfPurchase: new Date(2020, 28, 3),
+        },]
     }
 ]
 
 const myStocks: Stock[] = [
     {
-        txId: uuid.v4().toString(),
         name: 'NIFTYBEES',
-        quantity: 300,
-        buyingPrice: 250.30,
-        dateOfPurchase: new Date(2024, 5, 4),
-        currentPrice: 270.23
+        currentPrice: 270.23,
+        transactions: [
+            {
+                txId: uuid.v4(),
+                quantity: 300,
+                buyingPrice: 250.30,
+                dateOfPurchase: new Date(2024, 5, 4),
+            },
+            {
+                txId: uuid.v4(),
+                quantity: 150,
+                buyingPrice: 180.30,
+                dateOfPurchase: new Date(2024, 1, 9),
+            },
+        ]
     },
     {
-        txId: uuid.v4().toString(),
         name: 'MIDCAPETF',
-        quantity: 8000,
-        buyingPrice: 18.62,
-        dateOfPurchase: new Date(2024, 5, 4),
-        currentPrice: 21.29
+        currentPrice: 21.29,
+        transactions: [{
+            txId: uuid.v4(),
+            quantity: 8000,
+            buyingPrice: 18.62,
+            dateOfPurchase: new Date(2024, 5, 4),
+        },]
     }
 ]
 
-const stocks = teststocks;
+const stocks = myStocks;
 
 const PortfolioScreen = () => {
 
@@ -124,8 +142,8 @@ const PortfolioScreen = () => {
                     <ScrollView className='px-5'>
 
                         {
-                            stocks.map(stock => {
-                                return <PortfolioHoldingItem stock={stock} key={stock.txId} />
+                            stocks.map((stock, i) => {
+                                return <PortfolioHoldingItem stock={stock} key={i} />
                             })
                         }
 
