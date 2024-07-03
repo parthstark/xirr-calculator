@@ -153,6 +153,7 @@ const PortfolioScreen = () => {
                     <AddNewStockModal
                         isModalVisible={isAddStockModalVisible}
                         onRequestClose={closeAddStockModal}
+                    // stock={stocks[0]}
                     />
                 </SafeAreaView>
             </Animated.View>
