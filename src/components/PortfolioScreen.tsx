@@ -50,13 +50,7 @@ const myStocks: Stock[] = [
                 quantity: 300,
                 buyingPrice: 250.30,
                 dateOfPurchase: new Date(2024, 5, 4),
-            },
-            {
-                txId: uuid.v4(),
-                quantity: 150,
-                buyingPrice: 180.30,
-                dateOfPurchase: new Date(2024, 1, 9),
-            },
+            }
         ]
     },
     {
@@ -71,7 +65,7 @@ const myStocks: Stock[] = [
     }
 ]
 
-const stocks = myStocks;
+const stocks = teststocks;
 
 const PortfolioScreen = () => {
 
@@ -153,7 +147,7 @@ const PortfolioScreen = () => {
                     <AddStockDetailsModal
                         isModalVisible={isAddStockModalVisible}
                         onRequestClose={closeAddStockModal}
-                    // stock={stocks[0]}
+                        stock={stocks[0]}
                     />
                 </SafeAreaView>
             </Animated.View>
