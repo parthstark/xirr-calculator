@@ -3,17 +3,17 @@ import React, { useRef } from 'react'
 import { Stock } from '../types/types'
 import { useColorScheme } from 'nativewind';
 
-interface AddNewStockModalProps {
+interface AddStockDetailsModalProps {
     isModalVisible: boolean,
     onRequestClose: () => void,
     stock?: Stock,
 }
 
-const AddNewStockModal = ({
+const AddStockDetailsModal = ({
     isModalVisible,
     onRequestClose,
     stock,
-}: AddNewStockModalProps) => {
+}: AddStockDetailsModalProps) => {
 
     // chatgpt code
     const panResponder = useRef(
@@ -88,4 +88,4 @@ const AddNewStockModal = ({
     )
 }
 
-export default AddNewStockModal
+export default AddStockDetailsModal

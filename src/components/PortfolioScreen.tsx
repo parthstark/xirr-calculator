@@ -5,7 +5,7 @@ import uuid from 'react-native-uuid';
 import PortfolioHoldingItem from './PortfolioHoldingItem';
 import PortfolioAtGlance from './PortfolioAtGlance';
 import { Stock } from '../types/types';
-import AddNewStockModal from './AddNewStockModal';
+import AddStockDetailsModal from './AddStockDetailsModal';
 
 const teststocks: Stock[] = [
     {
@@ -150,7 +150,7 @@ const PortfolioScreen = () => {
                         {button}
                     </ScrollView>
 
-                    <AddNewStockModal
+                    <AddStockDetailsModal
                         isModalVisible={isAddStockModalVisible}
                         onRequestClose={closeAddStockModal}
                     // stock={stocks[0]}
