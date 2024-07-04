@@ -41,10 +41,10 @@ const AddStockDetailsModal = ({
         >
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                className='flex-1 justify-end bg-black/50'
+                className='flex-1 justify-end bg-black/70'
             // {...panResponder.panHandlers}
             >
-                <Text onPress={onRequestClose} className='font-light mb-1 text-center text-gray-100 dark:text-gray-400'>dismiss</Text>
+                <Text onPress={onRequestClose} className='font-normal mb-1 text-center text-gray-100 dark:text-gray-400'>dismiss</Text>
                 <View className='flex-[0.75]  bg-white dark:bg-slate-900 rounded-3xl'>
                     <SafeAreaView className='flex-1 items-center my-2'>
                         <View className='w-[100%] px-7 pt-7'>

@@ -5,10 +5,11 @@ import { getTailwindColorClassOnPriceComparison, calculateXIRRPercentage, splitN
 import Divider from './common/Divider';
 
 interface PortfolioHoldingItem {
-    stock: Stock
+    stock: Stock,
+    onPress: () => void,
 }
 
-const PortfolioHoldingItem = ({ stock }: PortfolioHoldingItem) => {
+const PortfolioHoldingItem = ({ stock, onPress }: PortfolioHoldingItem) => {
 
     let investedAmount = 0
     let currentAmount = 0
@@ -29,7 +30,7 @@ const PortfolioHoldingItem = ({ stock }: PortfolioHoldingItem) => {
     const displayColor = getTailwindColorClassOnPriceComparison(investedAmount, currentAmount);
 
     return (
-        <TouchableOpacity className='flex-col mt-5'>
+        <TouchableOpacity onPress={onPress} className='flex-col mt-5'>
             <View className='flex-row justify-between'>
                 <View className='flex-[1.5] flex-col items-start justify-end'>
                     <Text className='text-xl font-light text-black dark:text-white'>

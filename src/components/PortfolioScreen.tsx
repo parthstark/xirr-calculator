@@ -67,26 +67,31 @@ const myStocks: Stock[] = [
 
 const stocks = teststocks;
 
+interface StockModalStateData {
+    open: boolean,
+    stock?: Stock,
+}
+
 const PortfolioScreen = () => {
 
     const { toggleColorScheme } = useColorScheme();
-    const [isAddStockModalVisible, setIsAddStockModalVisible] = useState(false)
-    const openAddStockModal = () => setIsAddStockModalVisible(x => true);
-    const closeAddStockModal = () => setIsAddStockModalVisible(x => false);
+    const [stockModalData, setStockModalData] = useState<StockModalStateData>({ open: false })
+    const openAddStockModal = (stock?: Stock) => setStockModalData(x => ({ open: true, stock: stock }));
+    const closeAddStockModal = () => setStockModalData(x => ({ open: false }));
 
     const scaleValue = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
         Animated.timing(scaleValue, {
-            toValue: isAddStockModalVisible ? 0.95 : 1,
+            toValue: stockModalData.open ? 0.95 : 1,
             duration: 250,
             useNativeDriver: true,
         }).start();
-    }, [isAddStockModalVisible]);
+    }, [stockModalData]);
 
     const button = (
         <TouchableOpacity
-            onPress={openAddStockModal}
+            onPress={() => openAddStockModal()}
             className=' scale-90 flex-row justify-between items-center h-20 border-gray-300 dark:border-gray-500 border-2 border-dashed rounded-full px-5 my-5'>
             <Text className='text-6xl font-extralight text-black dark:text-white'>+</Text>
             <Text className='text-3xl font-extralight text-gray-500 dark:text-gray-50'>Tap to add new stock</Text>
@@ -136,18 +141,23 @@ const PortfolioScreen = () => {
                     <ScrollView className='px-5'>
 
                         {
-                            stocks.map((stock, i) => {
-                                return <PortfolioHoldingItem stock={stock} key={i} />
-                            })
+                            stocks.map((stock, i) => (
+                                <PortfolioHoldingItem
+                                    onPress={() => openAddStockModal(stock)}
+                                    stock={stock}
+                                    key={i}
+                                />
+                            )
+                            )
                         }
 
                         {button}
                     </ScrollView>
 
                     <AddStockDetailsModal
-                        isModalVisible={isAddStockModalVisible}
+                        isModalVisible={stockModalData.open}
                         onRequestClose={closeAddStockModal}
-                        stock={stocks[0]}
+                        stock={stockModalData.stock}
                     />
                 </SafeAreaView>
             </Animated.View>
