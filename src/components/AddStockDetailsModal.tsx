@@ -45,8 +45,8 @@ const AddStockDetailsModal = ({
             // {...panResponder.panHandlers}
             >
                 <Text onPress={onRequestClose} className='font-normal mb-1 text-center text-gray-100 dark:text-gray-400'>dismiss</Text>
-                <View className='flex-[0.75]  bg-white dark:bg-slate-900 rounded-3xl'>
-                    <SafeAreaView className='flex-1 items-center my-2'>
+                <View className='bg-white dark:bg-slate-900 rounded-t-3xl'>
+                    <SafeAreaView className='items-center my-2'>
                         <View className='w-[100%] px-7 pt-7'>
                             <View className='flex-row justify-between items-center border-b border-gray-200 dark:border-gray-700 mb-7'>
                                 <TextInput
@@ -64,10 +64,7 @@ const AddStockDetailsModal = ({
                                 }
                             </View>
                             <View className='flex-row justify-between items-center border-b border-gray-200 dark:border-gray-700 mb-7'>
-                                {editable
-                                    ? <Text className='font-extralight text-black dark:text-white'>x</Text>
-                                    : <View />
-                                }
+                                <Text className='font-extralight text-black dark:text-white'>x</Text>
                                 <TextInput
                                     className='text-4xl w-4/5 font-light text-black dark:text-white'
                                     textAlign='right'
@@ -76,9 +73,10 @@ const AddStockDetailsModal = ({
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
                                     value={stock?.currentPrice.toFixed(2).toString()}
-                                    editable={editable}
                                 />
                             </View>
+
+                            {/* title header */}
                             <View className='flex-row justify-between bg-gray-200 dark:bg-slate-700 py-2 px-10 mx-[-40]'>
                                 <View className='flex-[1.5] items-start'>
                                     <Text className='text-xs font-light text-gray-500 dark:text-gray-50'>DATE OF PURCHASE</Text>
@@ -91,7 +89,9 @@ const AddStockDetailsModal = ({
                                 </View>
                                 <View className='flex-[0.25]' />
                             </View>
-                            <View className='h-[240]'>
+
+                            {/* TXs  */}
+                            <View className='min-h-[112] max-h-[144]'>
                                 <FlatList
                                     data={stock?.transactions}
                                     renderItem={({ item }) => <TransactionDetail tx={item} />}
@@ -102,7 +102,7 @@ const AddStockDetailsModal = ({
                             </View>
 
                             {/* ADD NEW TX FIELDS */}
-                            <View className='mb-3'>
+                            <View className='mb-5'>
                                 <Text className='font-extralight text-black dark:text-white'>Add new transaction</Text>
                                 <View className='flex-row my-1 border border-gray-400 rounded-lg'>
                                     <View className='flex-[1.5] border-r border-gray-400 p-2 px-5'>
@@ -139,7 +139,6 @@ const AddStockDetailsModal = ({
                                 <Text className='text-right text-black dark:text-white font-bold text-xl m-[-10]'>✓</Text>
                             </View>
                         </View>
-                        <View className='flex-1' />
 
                         {/* FOOTER */}
                         <TouchableOpacity onPress={onRequestClose} className='bg-black dark:bg-slate-200 items-center rounded-xl w-[90%] py-3 mb-5'>
