@@ -1,40 +1,32 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
-import { Stock } from '../types/types';
-import { getTailwindColorClassOnPriceComparison, calculateXIRRPercentage, splitNumberToIntAndDecimal } from '../utils/utils';
+import React, { useMemo } from 'react'
+import { getTailwindColorClassOnPriceComparison, splitNumberToIntAndDecimal } from '../utils/utils';
 import Divider from './common/Divider';
+import { useRecoilValue } from 'recoil';
+import { stockSelectorFamily } from '../utils/atoms';
 
 interface PortfolioHoldingItem {
-    stock: Stock,
+    stockName: string,
     onPress: () => void,
 }
 
-const PortfolioHoldingItem = ({ stock, onPress }: PortfolioHoldingItem) => {
+const PortfolioHoldingItem = ({ stockName, onPress }: PortfolioHoldingItem) => {
 
-    let investedAmount = 0
-    let currentAmount = 0
-    let totalQuantity = 0
-    stock.transactions.forEach(tx => {
-        investedAmount += (tx.buyingPrice * tx.quantity);
-        currentAmount += (stock.currentPrice * tx.quantity);
-        totalQuantity += tx.quantity;
-    })
-    const xirReturn = calculateXIRRPercentage([stock]);
-    const absReturn = (currentAmount - investedAmount) / investedAmount * 100;
+    const { investedAmount, currentAmount, xirReturn, absReturn, totalQuantity } = useRecoilValue(stockSelectorFamily(stockName))
 
-    const [investedInt, investedDecimal] = splitNumberToIntAndDecimal(investedAmount)
-    const [currentInt, currentDecimal] = splitNumberToIntAndDecimal(currentAmount)
-    const [absReturnInt, absReturnDecimal] = splitNumberToIntAndDecimal(absReturn)
-    const [xirReturnInt, xirReturnDecimal] = splitNumberToIntAndDecimal(xirReturn)
+    const [investedInt, investedDecimal] = useMemo(() => splitNumberToIntAndDecimal(investedAmount), [investedAmount])
+    const [currentInt, currentDecimal] = useMemo(() => splitNumberToIntAndDecimal(currentAmount), [currentAmount])
+    const [xirReturnInt, xirReturnDecimal] = useMemo(() => splitNumberToIntAndDecimal(xirReturn), [xirReturn])
+    const [absReturnInt, absReturnDecimal] = useMemo(() => splitNumberToIntAndDecimal(absReturn), [absReturn])
 
-    const displayColor = getTailwindColorClassOnPriceComparison(investedAmount, currentAmount);
+    const displayColor = useMemo(() => getTailwindColorClassOnPriceComparison(investedAmount, currentAmount), [investedAmount, currentAmount])
 
     return (
         <TouchableOpacity onPress={onPress} className='flex-col mt-5'>
             <View className='flex-row justify-between'>
                 <View className='flex-[1.5] flex-col items-start justify-end'>
                     <Text className='text-xl font-light text-black dark:text-white'>
-                        {stock.name}
+                        {stockName}
                     </Text>
                 </View>
                 <View className='flex-1 flex-col items-center justify-end'>

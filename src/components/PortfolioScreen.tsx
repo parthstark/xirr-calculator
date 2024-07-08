@@ -3,14 +3,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useColorScheme } from 'nativewind'
 import PortfolioHoldingItem from './PortfolioHoldingItem';
 import PortfolioAtGlance from './PortfolioAtGlance';
-import { Stock } from '../types/types';
 import AddStockDetailsModal from './AddStockDetailsModal';
 import { useRecoilValue } from 'recoil';
 import { portfolioHoldingsAtom } from '../utils/atoms';
 
 interface StockModalStateData {
     open: boolean,
-    stock?: Stock,
+    stockName?: string,
 }
 
 const PortfolioScreen = () => {
@@ -19,7 +18,7 @@ const PortfolioScreen = () => {
 
     const { toggleColorScheme } = useColorScheme();
     const [stockModalData, setStockModalData] = useState<StockModalStateData>({ open: false })
-    const openAddStockModal = (stock?: Stock) => setStockModalData(x => ({ open: true, stock: stock }));
+    const openAddStockModal = (stockName?: string) => setStockModalData(x => ({ open: true, stockName: stockName }));
     const closeAddStockModal = () => setStockModalData(x => ({ open: false }));
 
     const scaleValue = useRef(new Animated.Value(1)).current;
@@ -86,8 +85,8 @@ const PortfolioScreen = () => {
                         {
                             stocks.map((stock, i) => (
                                 <PortfolioHoldingItem
-                                    onPress={() => openAddStockModal(stock)}
-                                    stock={stock}
+                                    onPress={() => openAddStockModal(stock.name)}
+                                    stockName={stock.name}
                                     key={i}
                                 />
                             )
@@ -100,7 +99,7 @@ const PortfolioScreen = () => {
                     <AddStockDetailsModal
                         isModalVisible={stockModalData.open}
                         onRequestClose={closeAddStockModal}
-                        stock={stockModalData.stock}
+                        stockName={stockModalData.stockName}
                     />
                 </SafeAreaView>
             </Animated.View>

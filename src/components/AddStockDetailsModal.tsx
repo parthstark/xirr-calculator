@@ -1,19 +1,21 @@
 import { View, Text, Modal, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, FlatList } from 'react-native'
 import React from 'react'
-import { Stock, Transaction } from '../types/types'
+import { Transaction } from '../types/types'
 import { useColorScheme } from 'nativewind';
 import Divider from './common/Divider';
+import { useRecoilValue } from 'recoil';
+import { stockAtomFamily } from '../utils/atoms';
 
 interface AddStockDetailsModalProps {
     isModalVisible: boolean,
     onRequestClose: () => void,
-    stock?: Stock,
+    stockName?: string,
 }
 
 const AddStockDetailsModal = ({
     isModalVisible,
     onRequestClose,
-    stock,
+    stockName,
 }: AddStockDetailsModalProps) => {
 
     // chatgpt code
@@ -29,6 +31,7 @@ const AddStockDetailsModal = ({
     //     })
     // ).current;
 
+    const stock = useRecoilValue(stockAtomFamily(stockName))
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
     const editable = (stock === undefined)

@@ -1,32 +1,21 @@
 import { View, Text } from 'react-native'
-import React from 'react'
-import { calculateXIRRPercentage, splitNumberToIntAndDecimal, getTailwindColorClassOnPriceComparison } from '../utils/utils'
+import React, { useMemo } from 'react'
+import { splitNumberToIntAndDecimal, getTailwindColorClassOnPriceComparison } from '../utils/utils'
 import { useRecoilValue } from 'recoil'
-import { portfolioHoldingsAtom } from '../utils/atoms'
+import { portfolioReturnsSeclector } from '../utils/atoms'
 
 interface PortfolioAtGlanceProps {
 }
 
 const PortfolioAtGlance = ({ }: PortfolioAtGlanceProps) => {
-    const stocks = useRecoilValue(portfolioHoldingsAtom)
+    const { investedAmount, currentAmount, xirReturn, absReturn } = useRecoilValue(portfolioReturnsSeclector)
 
-    let investedAmount = 0
-    let currentAmount = 0
-    stocks.forEach(stock => {
-        stock.transactions.forEach(tx => {
-            investedAmount += (tx.buyingPrice * tx.quantity);
-            currentAmount += (stock.currentPrice * tx.quantity);
-        })
-    })
-    const xirReturn = calculateXIRRPercentage(stocks);
-    const absReturn = (currentAmount - investedAmount) / investedAmount * 100;
+    const [investedInt, investedDecimal] = useMemo(() => splitNumberToIntAndDecimal(investedAmount), [investedAmount])
+    const [currentInt, currentDecimal] = useMemo(() => splitNumberToIntAndDecimal(currentAmount), [currentAmount])
+    const [xirReturnInt, xirReturnDecimal] = useMemo(() => splitNumberToIntAndDecimal(xirReturn), [xirReturn])
+    const [absReturnInt, absReturnDecimal] = useMemo(() => splitNumberToIntAndDecimal(absReturn), [absReturn])
 
-    const [investedInt, investedDecimal] = splitNumberToIntAndDecimal(investedAmount)
-    const [currentInt, currentDecimal] = splitNumberToIntAndDecimal(currentAmount)
-    const [absReturnInt, absReturnDecimal] = splitNumberToIntAndDecimal(absReturn)
-    const [xirReturnInt, xirReturnDecimal] = splitNumberToIntAndDecimal(xirReturn)
-
-    const displayColor = getTailwindColorClassOnPriceComparison(investedAmount, currentAmount);
+    const displayColor = useMemo(() => getTailwindColorClassOnPriceComparison(investedAmount, currentAmount), [investedAmount, currentAmount])
 
     return (
         <View className='flex-col bg-gray-100 dark:bg-slate-800 px-10'>

@@ -1,6 +1,7 @@
 import uuid from 'react-native-uuid';
-import { atom } from "recoil";
+import { atom, atomFamily, selector, selectorFamily } from "recoil";
 import { Stock } from "../types/types";
+import { calculateXIRRPercentage } from './utils';
 
 const teststocks: Stock[] = [
     {
@@ -63,4 +64,48 @@ const myStocks: Stock[] = [
 export const portfolioHoldingsAtom = atom<Stock[]>({
     key: "portfolioHoldingsAtom",
     default: myStocks
+})
+
+export const portfolioReturnsSeclector = selector({
+    key: "portfolioReturnsSeclector",
+    get: ({ get }) => {
+        const holdings = get(portfolioHoldingsAtom)
+        let investedAmount = 0
+        let currentAmount = 0
+        holdings.forEach(stock => {
+            stock.transactions.forEach(tx => {
+                investedAmount += (tx.buyingPrice * tx.quantity);
+                currentAmount += (stock.currentPrice * tx.quantity);
+            })
+        })
+        const xirReturn = calculateXIRRPercentage(holdings);
+        const absReturn = (currentAmount - investedAmount) / investedAmount * 100;
+        return { investedAmount, currentAmount, xirReturn, absReturn }
+    }
+})
+
+export const stockAtomFamily = atomFamily({
+    key: "stockAtomFamily",
+    default: (stockName?: string) => {
+        return myStocks.find(stock => stock.name === stockName)
+    }
+})
+
+export const stockSelectorFamily = selectorFamily({
+    key: "stockSelectorFamily",
+    get: (stockName: string) => () => {
+        const stock = myStocks.find(stock => stock.name === stockName)
+
+        let investedAmount = 0
+        let currentAmount = 0
+        let totalQuantity = 0
+        stock?.transactions.forEach(tx => {
+            investedAmount += (tx.buyingPrice * tx.quantity);
+            currentAmount += (stock.currentPrice * tx.quantity);
+            totalQuantity += tx.quantity;
+        })
+        const xirReturn = stock ? calculateXIRRPercentage([stock]) : NaN;
+        const absReturn = (currentAmount - investedAmount) / investedAmount * 100;
+        return { investedAmount, currentAmount, xirReturn, absReturn, totalQuantity }
+    }
 })
