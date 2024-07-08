@@ -14,6 +14,7 @@
     "react": "18.2.0",
     "react-native": "0.74.3",
     "react-native-uuid": "^2.0.2",
+    "recoil": "^0.7.7",
     "xirr": "^1.1.0"
   },
   "devDependencies": {

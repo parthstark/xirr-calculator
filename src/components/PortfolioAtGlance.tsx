@@ -1,13 +1,14 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import { Stock } from '../types/types'
 import { calculateXIRRPercentage, splitNumberToIntAndDecimal, getTailwindColorClassOnPriceComparison } from '../utils/utils'
+import { useRecoilValue } from 'recoil'
+import { portfolioHoldingsAtom } from '../utils/atoms'
 
 interface PortfolioAtGlanceProps {
-    stocks: Stock[]
 }
 
-const PortfolioAtGlance = ({ stocks }: PortfolioAtGlanceProps) => {
+const PortfolioAtGlance = ({ }: PortfolioAtGlanceProps) => {
+    const stocks = useRecoilValue(portfolioHoldingsAtom)
 
     let investedAmount = 0
     let currentAmount = 0
