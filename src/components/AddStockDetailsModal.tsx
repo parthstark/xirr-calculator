@@ -1,10 +1,12 @@
-import { View, Text, Modal, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, FlatList } from 'react-native'
-import React from 'react'
+import { View, Text, Modal, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, FlatList } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { Transaction } from '../types/types'
 import { useColorScheme } from 'nativewind';
 import Divider from './common/Divider';
 import { useRecoilValue } from 'recoil';
 import { stockSelectorFamily } from '../utils/atoms';
+import DatePicker from 'react-native-date-picker';
+import { isIos } from '../utils/utils';
 
 interface AddStockDetailsModalProps {
     isModalVisible: boolean,
@@ -35,6 +37,14 @@ const AddStockDetailsModal = ({
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
     const editable = (stock === undefined)
+
+    const [openDatePicker, setOpenDatePicker] = useState(false)
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+    useEffect(() => {
+        if (isModalVisible) {
+            setSelectedDate(x => undefined)
+        }
+    }, [isModalVisible])
     return (
         <Modal
             animationType='slide'
@@ -43,7 +53,7 @@ const AddStockDetailsModal = ({
             onRequestClose={onRequestClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={isIos() ? 'padding' : 'height'}
                 className='flex-1 justify-end bg-black/70'
             // {...panResponder.panHandlers}
             >
@@ -109,18 +119,17 @@ const AddStockDetailsModal = ({
                                 <Text className='font-extralight text-black dark:text-white'>Add new transaction</Text>
                                 <View className='flex-row my-1 border border-gray-400 rounded-lg'>
                                     <View className='flex-[1.5] border-r border-gray-400 p-2 px-5'>
-                                        <TextInput
-                                            className='text-xl font-light text-black dark:text-white'
-                                            textAlign='left'
-                                            placeholder='DATE'
-                                            keyboardType='number-pad'
-                                            returnKeyType='done'
-                                            placeholderTextColor={placeHolderColor}
-                                        />
+                                        <Text
+                                            className={'text-xl font-light text-black dark:text-white'}
+                                            onPress={() => setOpenDatePicker(x => true)}
+                                        >
+                                            {selectedDate?.toLocaleDateString() ?? ''}
+                                            {!selectedDate && <Text className='opacity-30'>{'DATE'}</Text>}
+                                        </Text>
                                     </View>
                                     <View className='flex-1 border-r border-gray-400 p-2 px-5'>
                                         <TextInput
-                                            className='text-xl font-light text-black dark:text-white'
+                                            className='text-xl font-light text-black dark:text-white bottom-0.5'
                                             textAlign='center'
                                             placeholder='QTY'
                                             keyboardType='number-pad'
@@ -130,7 +139,7 @@ const AddStockDetailsModal = ({
                                     </View>
                                     <View className='flex-1 border-r border-gray-400 p-2 px-5'>
                                         <TextInput
-                                            className='text-xl font-light text-black dark:text-white'
+                                            className='text-xl font-light text-black dark:text-white bottom-0.5'
                                             textAlign='right'
                                             placeholder='AVG'
                                             keyboardType='decimal-pad'
@@ -149,6 +158,19 @@ const AddStockDetailsModal = ({
                         </TouchableOpacity>
                     </SafeAreaView>
                 </View>
+
+                <DatePicker
+                    modal
+                    mode='date'
+                    open={openDatePicker}
+                    maximumDate={new Date()}
+                    date={selectedDate ?? new Date()}
+                    onConfirm={(date) => {
+                        setOpenDatePicker(x => false)
+                        setSelectedDate(date)
+                    }}
+                    onCancel={() => setOpenDatePicker(x => false)}
+                />
             </KeyboardAvoidingView>
         </Modal>
     )

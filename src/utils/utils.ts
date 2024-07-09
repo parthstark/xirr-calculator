@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { Stock } from "../types/types";
 var xirr = require('xirr');
 
@@ -63,3 +64,6 @@ export const getTailwindColorClassOnPriceComparison = (initialPrice: number, fin
     }
     return 'text-black dark:text-white';
 }
+
+export const isIos = (): boolean => Platform.OS === 'ios';
+export const isAndroid = (): boolean => Platform.OS === 'android';
