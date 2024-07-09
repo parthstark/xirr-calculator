@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 import { getTailwindColorClassOnPriceComparison, splitNumberToIntAndDecimal } from '../utils/utils';
 import Divider from './common/Divider';
 import { useRecoilValue } from 'recoil';
-import { stockSelectorFamily } from '../utils/atoms';
+import { stockReturnsSelectorFamily } from '../utils/atoms';
 
 interface PortfolioHoldingItem {
     stockName: string,
@@ -12,7 +12,7 @@ interface PortfolioHoldingItem {
 
 const PortfolioHoldingItem = ({ stockName, onPress }: PortfolioHoldingItem) => {
 
-    const { investedAmount, currentAmount, xirReturn, absReturn, totalQuantity } = useRecoilValue(stockSelectorFamily(stockName))
+    const { investedAmount, currentAmount, xirReturn, absReturn, totalQuantity } = useRecoilValue(stockReturnsSelectorFamily(stockName))
 
     const [investedInt, investedDecimal] = useMemo(() => splitNumberToIntAndDecimal(investedAmount), [investedAmount])
     const [currentInt, currentDecimal] = useMemo(() => splitNumberToIntAndDecimal(currentAmount), [currentAmount])

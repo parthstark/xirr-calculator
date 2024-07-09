@@ -1,6 +1,6 @@
 export type Transaction = {
     txId: string | number[],
-    dateOfPurchase: Date,
+    dateOfPurchaseMsEpoch: number,
     quantity: number,
     buyingPrice: number
 }

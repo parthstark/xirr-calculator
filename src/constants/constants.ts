@@ -1,0 +1,1 @@
+export const HOLDINGS_LOCAL_STORAGE_KEY = "holdingsLocalStorageKey";

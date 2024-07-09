@@ -4,7 +4,7 @@ import { Transaction } from '../types/types'
 import { useColorScheme } from 'nativewind';
 import Divider from './common/Divider';
 import { useRecoilValue } from 'recoil';
-import { stockAtomFamily } from '../utils/atoms';
+import { stockSelectorFamily } from '../utils/atoms';
 
 interface AddStockDetailsModalProps {
     isModalVisible: boolean,
@@ -31,7 +31,7 @@ const AddStockDetailsModal = ({
     //     })
     // ).current;
 
-    const stock = useRecoilValue(stockAtomFamily(stockName))
+    const stock = useRecoilValue(stockSelectorFamily(stockName))
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
     const editable = (stock === undefined)
@@ -164,7 +164,7 @@ const TransactionDetail = ({ tx }: TransactionDetailProps) => {
         <View className='flex-row justify-between my-2'>
             <View className='flex-[1.5] flex-col items-start justify-end'>
                 <Text className='text-xl font-light text-black dark:text-white'>
-                    {tx.dateOfPurchase.toDateString().slice(4)}
+                    {new Date(tx.dateOfPurchaseMsEpoch).toDateString().slice(4)}
                 </Text>
             </View>
             <View className='flex-1 flex-col items-center justify-end'>
