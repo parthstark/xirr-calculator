@@ -71,13 +71,21 @@ const AddStockDetailsModal = ({
     }
 
     const handleOnSaveButtonPress = () => {
-        if (!editable && currentStock.transactions.length !== (portfolioStock?.transactions.length ?? 0)) {
+        if (isTxDetailsFilled) {
+            handleOnTickPress()
+            return
+        }
+        if (!editable) {
             setPortfolioStock(currentStock)
             onRequestClose()
+            return
         }
-        else if (editable && currentStock.name && currentStock.currentPrice && currentStock.transactions.length) {
+
+        const allDetailsFilled = currentStock.name.length != 0 && currentStock.currentPrice != 0 && currentStock.transactions.length != 0
+        if (editable && allDetailsFilled) {
             setPortfolioHoldings([...portfolioHoldings, currentStock])
             onRequestClose()
+            return
         }
     }
 
@@ -99,6 +107,7 @@ const AddStockDetailsModal = ({
     }
 
     const clearTxFields = () => setTxFieldObject({})
+
     const resetAllFields = () => {
         clearTxFields()
         if (!stockName) {
