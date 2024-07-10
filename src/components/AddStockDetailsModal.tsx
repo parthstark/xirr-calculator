@@ -23,6 +23,14 @@ const AddStockDetailsModal = ({
 }: AddStockDetailsModalProps) => {
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
+    const clearTxFields = () => setTxObject({})
+    const clearAllFields = () => {
+        clearTxFields()
+        if (!stockName) {
+            setCurrStockName('')
+            setCurrStockPrice('')
+        }
+    }
 
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [currStockName, setCurrStockName] = useState('')
@@ -34,17 +42,14 @@ const AddStockDetailsModal = ({
         buyingPrice?: string
     }>({})
 
-    const editable = (stock === undefined)
-    const isTxDetailsFilled = !(!txObject.buyingPrice || !txObject.dateMs || !txObject.quantity)
+    useEffect(() => {
+        if (isModalVisible) clearAllFields()
+    }, [isModalVisible])
 
-    const clearTxFields = () => setTxObject({})
-    const clearAllFields = () => {
-        clearTxFields()
-        if (!stockName) {
-            setCurrStockName('')
-            setCurrStockPrice('')
-        }
-    }
+    useEffect(() => {
+        if (stock?.name) setCurrStockName(stock.name)
+        if (stock?.currentPrice) setCurrStockPrice(stock.currentPrice.toString())
+    }, [stock])
 
     const handleOnTickPress = () => {
         const currentTxs = stock?.transactions ?? []
@@ -65,14 +70,8 @@ const AddStockDetailsModal = ({
         clearTxFields()
     }
 
-    useEffect(() => {
-        if (isModalVisible) clearAllFields()
-    }, [isModalVisible])
-
-    useEffect(() => {
-        if (stock?.name) setCurrStockName(stock.name)
-        if (stock?.currentPrice) setCurrStockPrice(stock.currentPrice.toString())
-    }, [stock])
+    const editable = (stock === undefined)
+    const isTxDetailsFilled = !(!txObject.buyingPrice || !txObject.dateMs || !txObject.quantity)
 
     return (
         <Modal
