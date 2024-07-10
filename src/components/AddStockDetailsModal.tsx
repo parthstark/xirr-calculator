@@ -31,6 +31,7 @@ const AddStockDetailsModal = ({
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
 
     // BUG: current price input field not taking decimals
+    // BUG: save non editable stock with 0 Txs
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [currentStock, setCurrentStock] = useState<Stock>(emptyStock)
     const [portfolioStock, setPortfolioStock] = useRecoilState(stockSelectorFamily(stockName ?? currentStock.name))
@@ -134,14 +135,14 @@ const AddStockDetailsModal = ({
                         <View className='w-[100%] px-7 pt-7'>
                             <View className='flex-row justify-between items-center border-b border-gray-200 dark:border-gray-700 mb-7'>
                                 <TextInput
+                                    editable={editable}
                                     className='text-4xl w-4/5 font-light text-black dark:text-white'
                                     placeholder='name'
                                     autoCapitalize='characters'
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
                                     value={currentStock.name}
-                                    onChangeText={(text) => { setCurrentStock({ ...currentStock, name: text }) }}
-                                    editable={editable}
+                                    onChangeText={(text) => setCurrentStock({ ...currentStock, name: text })}
                                 />
                                 {editable
                                     ? <Text className='font-extralight text-black dark:text-white'>x</Text>
@@ -162,7 +163,7 @@ const AddStockDetailsModal = ({
                                             ? currentStock.currentPrice.toString()
                                             : ''
                                     }
-                                    onChangeText={(text) => { setCurrentStock({ ...currentStock, currentPrice: parseFloat(text) }) }}
+                                    onChangeText={(text) => setCurrentStock({ ...currentStock, currentPrice: parseFloat(text) })}
                                 />
                             </View>
 
