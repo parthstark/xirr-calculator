@@ -29,7 +29,11 @@ export const calculateXIRRPercentage = (stocks: Stock[]): number => {
         })
     });
 
-    return xirr(xirrArray) * 100;
+    try {
+        return xirr(xirrArray) * 100;
+    } catch (_) {
+        return NaN
+    }
 }
 
 export const splitNumberToIntAndDecimal = (val: number): [string, string] => {
