@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React, { useMemo } from 'react'
 import { getTailwindColorClassOnPriceComparison, splitNumberToIntAndDecimal } from '../utils/utils';
-import Divider from './common/Divider';
+import Divider from './base/Divider';
 import { useRecoilValue } from 'recoil';
 import { stockReturnsSelectorFamily } from '../utils/atoms';
 

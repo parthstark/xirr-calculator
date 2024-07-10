@@ -34,6 +34,22 @@ export const stockSelectorFamily = selectorFamily({
     get: (stockName?: string) => ({ get }) => {
         const holdings = get(portfolioHoldingsAtom)
         return holdings.find(stock => stock.name === stockName)
+    },
+    set: (stockName?: string) => ({ set, get }, newValue) => {
+        const holdings = get(portfolioHoldingsAtom);
+        const stockIndex = holdings.findIndex(stock => stock.name === stockName);
+
+        if (stockIndex !== -1) {
+            // Stock found, update it
+            const updatedHoldings = holdings.map((stock, index) =>
+                index === stockIndex ? { ...stock, ...newValue } : stock
+            );
+            set(portfolioHoldingsAtom, updatedHoldings);
+        } else {
+            // Stock not found, add it
+            const newStock: Stock = { ...newValue };
+            set(portfolioHoldingsAtom, [...holdings, newStock]);
+        }
     }
 })
 

@@ -1,12 +1,14 @@
 import { View, Text, Modal, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, FlatList } from 'react-native'
+import uuid from 'react-native-uuid'
 import React, { useEffect, useState } from 'react'
 import { Transaction } from '../types/types'
 import { useColorScheme } from 'nativewind';
-import Divider from './common/Divider';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { stockSelectorFamily } from '../utils/atoms';
 import DatePicker from 'react-native-date-picker';
 import { isIos } from '../utils/utils';
+import Divider from './base/Divider';
+import TransactionDetail from './base/TransactionDetail';
 
 interface AddStockDetailsModalProps {
     isModalVisible: boolean,
@@ -19,32 +21,57 @@ const AddStockDetailsModal = ({
     onRequestClose,
     stockName,
 }: AddStockDetailsModalProps) => {
-
-    // chatgpt code
-    // const panResponder = useRef(
-    //     PanResponder.create({
-    //         onStartShouldSetPanResponder: () => true,
-    //         onMoveShouldSetPanResponder: () => true,
-    //         onPanResponderMove: (_, gestureState) => {
-    //             if (gestureState.dy > 50) {
-    //                 onRequestClose()
-    //             }
-    //         },
-    //     })
-    // ).current;
-
-    const stock = useRecoilValue(stockSelectorFamily(stockName))
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
-    const editable = (stock === undefined)
 
     const [openDatePicker, setOpenDatePicker] = useState(false)
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+    const [currStockName, setCurrStockName] = useState(stockName ?? '')
+    const [currStockPrice, setCurrStockPrice] = useState('')
+    const [stock, setStock] = useRecoilState(stockSelectorFamily(stockName))
+    const [txObject, setTxObject] = useState<{
+        dateMs?: number,
+        quantity?: string,
+        buyingPrice?: string
+    }>({})
+
+    const editable = (stock === undefined)
+    const isTxDetailsFilled = !(!txObject.buyingPrice || !txObject.dateMs || !txObject.quantity)
+
     useEffect(() => {
-        if (isModalVisible) {
-            setSelectedDate(x => undefined)
-        }
+        if (isModalVisible) clearAllFields()
     }, [isModalVisible])
+
+    const clearTxFields = () => setTxObject({})
+    const clearAllFields = () => {
+        setCurrStockName('')
+        setCurrStockPrice('')
+        setTxObject({})
+    }
+
+    const handleOnTickPress = () => {
+        const currentTxs = stock?.transactions ?? []
+        if (!isTxDetailsFilled || !currStockName || !currStockPrice) {
+            return
+        }
+
+        setStock({
+            name: currStockName,
+            currentPrice: parseFloat(currStockPrice),
+            transactions: [...currentTxs, {
+                txId: uuid.v4(),
+                dateOfPurchaseMsEpoch: txObject.dateMs!,
+                quantity: parseInt(txObject.quantity!),
+                buyingPrice: parseFloat(txObject.buyingPrice!),
+            }]
+        })
+        clearTxFields()
+    }
+
+    useEffect(() => {
+        if (stock?.name) setCurrStockName(stock.name)
+        if (stock?.currentPrice) setCurrStockPrice(stock.currentPrice.toString())
+    }, [stock])
+
     return (
         <Modal
             animationType='slide'
@@ -55,7 +82,6 @@ const AddStockDetailsModal = ({
             <KeyboardAvoidingView
                 behavior={isIos() ? 'padding' : 'height'}
                 className='flex-1 justify-end bg-black/70'
-            // {...panResponder.panHandlers}
             >
                 <Text onPress={onRequestClose} className='font-normal mb-1 text-center text-gray-100 dark:text-gray-400'>dismiss</Text>
                 <View className='bg-white dark:bg-slate-900 rounded-t-3xl'>
@@ -68,7 +94,8 @@ const AddStockDetailsModal = ({
                                     autoCapitalize='characters'
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
-                                    value={stock?.name}
+                                    value={currStockName}
+                                    onChangeText={(text) => { setCurrStockName(x => text) }}
                                     editable={editable}
                                 />
                                 {editable
@@ -85,7 +112,8 @@ const AddStockDetailsModal = ({
                                     keyboardType='decimal-pad'
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
-                                    value={stock?.currentPrice.toFixed(2).toString()}
+                                    value={currStockPrice}
+                                    onChangeText={(text) => { setCurrStockPrice(x => text) }}
                                 />
                             </View>
 
@@ -123,8 +151,8 @@ const AddStockDetailsModal = ({
                                             className={'text-xl font-light text-black dark:text-white'}
                                             onPress={() => setOpenDatePicker(x => true)}
                                         >
-                                            {selectedDate?.toLocaleDateString() ?? ''}
-                                            {!selectedDate && <Text className='opacity-30'>{'DATE'}</Text>}
+                                            {txObject.dateMs && new Date(txObject.dateMs).toLocaleDateString()}
+                                            {!txObject.dateMs && <Text className='opacity-30'>{'DATE'}</Text>}
                                         </Text>
                                     </View>
                                     <View className='flex-1 border-r border-gray-400 p-2 px-5'>
@@ -135,6 +163,9 @@ const AddStockDetailsModal = ({
                                             keyboardType='number-pad'
                                             returnKeyType='done'
                                             placeholderTextColor={placeHolderColor}
+                                            value={txObject.quantity?.toString()}
+                                            onChangeText={(text) => setTxObject({ ...txObject, quantity: text })}
+                                            contextMenuHidden
                                         />
                                     </View>
                                     <View className='flex-1 border-r border-gray-400 p-2 px-5'>
@@ -145,10 +176,19 @@ const AddStockDetailsModal = ({
                                             keyboardType='decimal-pad'
                                             returnKeyType='done'
                                             placeholderTextColor={placeHolderColor}
+                                            value={txObject.buyingPrice?.toString()}
+                                            onChangeText={(text) => setTxObject({ ...txObject, buyingPrice: text })}
+                                            contextMenuHidden
                                         />
                                     </View>
                                 </View>
-                                <Text className='text-right text-black dark:text-white font-bold text-xl m-[-10]'>✓</Text>
+                                {isTxDetailsFilled &&
+                                    <Text
+                                        onPress={handleOnTickPress}
+                                        className='text-right text-black dark:text-white font-bold text-xl m-[-10]'>
+                                        ✓
+                                    </Text>
+                                }
                             </View>
                         </View>
 
@@ -164,10 +204,10 @@ const AddStockDetailsModal = ({
                     mode='date'
                     open={openDatePicker}
                     maximumDate={new Date()}
-                    date={selectedDate ?? new Date()}
+                    date={new Date(txObject.dateMs ?? new Date())}
                     onConfirm={(date) => {
                         setOpenDatePicker(x => false)
-                        setSelectedDate(date)
+                        setTxObject({ ...txObject, dateMs: date.valueOf() })
                     }}
                     onCancel={() => setOpenDatePicker(x => false)}
                 />
@@ -177,31 +217,3 @@ const AddStockDetailsModal = ({
 }
 
 export default AddStockDetailsModal
-
-interface TransactionDetailProps {
-    tx: Transaction,
-}
-const TransactionDetail = ({ tx }: TransactionDetailProps) => {
-    return (
-        <View className='flex-row justify-between my-2'>
-            <View className='flex-[1.5] flex-col items-start justify-end'>
-                <Text className='text-xl font-light text-black dark:text-white'>
-                    {new Date(tx.dateOfPurchaseMsEpoch).toDateString().slice(4)}
-                </Text>
-            </View>
-            <View className='flex-1 flex-col items-center justify-end'>
-                <Text className='text-2xl font-light text-black dark:text-white'>
-                    {tx.quantity}
-                </Text>
-            </View>
-            <View className='flex-1 flex-col items-end justify-end'>
-                <Text className='text-xl font-light text-black dark:text-white'>
-                    {tx.buyingPrice.toFixed(2)}
-                </Text>
-            </View>
-            <View className='flex-[0.25] justify-center items-end mt-1 ml-[1] mr-[-1]'>
-                <Text className='text-red-500'>D</Text>
-            </View>
-        </View>
-    );
-}
