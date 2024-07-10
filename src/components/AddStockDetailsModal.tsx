@@ -1,14 +1,20 @@
-import { View, Text, Modal, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, FlatList } from 'react-native'
+import { View, Text, Modal, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, FlatList, Alert } from 'react-native'
 import uuid from 'react-native-uuid'
 import React, { useEffect, useState } from 'react'
-import { Transaction } from '../types/types'
+import { Stock } from '../types/types'
 import { useColorScheme } from 'nativewind';
 import { useRecoilState } from 'recoil';
-import { stockSelectorFamily } from '../utils/atoms';
+import { portfolioHoldingsAtom, stockSelectorFamily } from '../utils/atoms';
 import DatePicker from 'react-native-date-picker';
 import { isIos } from '../utils/utils';
 import Divider from './base/Divider';
 import TransactionDetail from './base/TransactionDetail';
+
+const emptyStock: Stock = {
+    name: '',
+    currentPrice: 0,
+    transactions: []
+}
 
 interface AddStockDetailsModalProps {
     isModalVisible: boolean,
@@ -23,55 +29,84 @@ const AddStockDetailsModal = ({
 }: AddStockDetailsModalProps) => {
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
-    const clearTxFields = () => setTxObject({})
-    const clearAllFields = () => {
-        clearTxFields()
-        if (!stockName) {
-            setCurrStockName('')
-            setCurrStockPrice('')
-        }
-    }
 
+    // BUG: current price input field not taking decimals
     const [openDatePicker, setOpenDatePicker] = useState(false)
-    const [currStockName, setCurrStockName] = useState('')
-    const [currStockPrice, setCurrStockPrice] = useState('')
-    const [stock, setStock] = useRecoilState(stockSelectorFamily(stockName ?? currStockName))
-    const [txObject, setTxObject] = useState<{
+    const [currentStock, setCurrentStock] = useState<Stock>(emptyStock)
+    const [portfolioStock, setPortfolioStock] = useRecoilState(stockSelectorFamily(stockName ?? currentStock.name))
+    const [portfolioHoldings, setPortfolioHoldings] = useRecoilState(portfolioHoldingsAtom)
+    const [txFieldObject, setTxFieldObject] = useState<{
         dateMs?: number,
         quantity?: string,
         buyingPrice?: string
     }>({})
 
     useEffect(() => {
-        if (isModalVisible) clearAllFields()
+        if (isModalVisible) resetAllFields()
     }, [isModalVisible])
 
     useEffect(() => {
-        if (stock?.name) setCurrStockName(stock.name)
-        if (stock?.currentPrice) setCurrStockPrice(stock.currentPrice.toString())
-    }, [stock])
+        if (portfolioStock) setCurrentStock(portfolioStock) //found stock in holdings -> update current stock
+        else setCurrentStock({ ...emptyStock, name: currentStock.name }) //undefined -> emptystock, BUT retain name in input field
+    }, [portfolioStock])
+
+    const editable = !stockName
+    const isTxDetailsFilled = !(!txFieldObject.buyingPrice || !txFieldObject.dateMs || !txFieldObject.quantity)
 
     const handleOnTickPress = () => {
-        const currentTxs = stock?.transactions ?? []
-        if (!isTxDetailsFilled || !currStockName || !currStockPrice) {
+        if (!isTxDetailsFilled) {
             return
         }
 
-        setStock({
-            name: currStockName,
-            currentPrice: parseFloat(currStockPrice),
-            transactions: [...currentTxs, {
+        setCurrentStock({
+            ...currentStock,
+            transactions: [...currentStock.transactions, {
                 txId: uuid.v4(),
-                dateOfPurchaseMsEpoch: txObject.dateMs!,
-                quantity: parseInt(txObject.quantity!),
-                buyingPrice: parseFloat(txObject.buyingPrice!),
+                dateOfPurchaseMsEpoch: txFieldObject.dateMs!,
+                quantity: parseInt(txFieldObject.quantity!),
+                buyingPrice: parseFloat(txFieldObject.buyingPrice!),
             }]
         })
         clearTxFields()
     }
 
-    const editable = (stock === undefined)
-    const isTxDetailsFilled = !(!txObject.buyingPrice || !txObject.dateMs || !txObject.quantity)
+    const handleOnSaveButtonPress = () => {
+        if (!editable && currentStock.transactions.length !== (portfolioStock?.transactions.length ?? 0)) {
+            setPortfolioStock(currentStock)
+            onRequestClose()
+        }
+        else if (editable && currentStock.name && currentStock.currentPrice && currentStock.transactions.length) {
+            setPortfolioHoldings([...portfolioHoldings, currentStock])
+            onRequestClose()
+        }
+    }
+
+    const handleOnDeleteButtonPress = () => {
+        Alert.alert(
+            'Delete stock',
+            'Are you sure you want to remove this stock from your portfolio?',
+            [
+                {
+                    text: 'confirm',
+                    onPress: () => {
+                        const updatedHoldings = portfolioHoldings.filter(stock => stock.name !== currentStock.name)
+                        setPortfolioHoldings([...updatedHoldings])
+                        onRequestClose()
+                    }
+                }
+            ]
+        )
+    }
+
+    const clearTxFields = () => setTxFieldObject({})
+    const resetAllFields = () => {
+        clearTxFields()
+        if (!stockName) {
+            setCurrentStock(emptyStock)
+        } else {
+            setCurrentStock(portfolioStock ?? emptyStock)
+        }
+    }
 
     return (
         <Modal
@@ -95,8 +130,8 @@ const AddStockDetailsModal = ({
                                     autoCapitalize='characters'
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
-                                    value={currStockName}
-                                    onChangeText={(text) => { setCurrStockName(x => text) }}
+                                    value={currentStock.name}
+                                    onChangeText={(text) => { setCurrentStock({ ...currentStock, name: text }) }}
                                     editable={editable}
                                 />
                                 {editable
@@ -110,11 +145,15 @@ const AddStockDetailsModal = ({
                                     className='text-4xl w-4/5 font-light text-black dark:text-white'
                                     textAlign='right'
                                     placeholder='current price'
-                                    keyboardType='decimal-pad'
+                                    keyboardType='number-pad'
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
-                                    value={currStockPrice}
-                                    onChangeText={(text) => { setCurrStockPrice(x => text) }}
+                                    value={
+                                        currentStock.currentPrice
+                                            ? currentStock.currentPrice.toString()
+                                            : ''
+                                    }
+                                    onChangeText={(text) => { setCurrentStock({ ...currentStock, currentPrice: parseFloat(text) }) }}
                                 />
                             </View>
 
@@ -135,8 +174,15 @@ const AddStockDetailsModal = ({
                             {/* TXs  */}
                             <View className='min-h-[112] max-h-[144]'>
                                 <FlatList
-                                    data={stock?.transactions}
-                                    renderItem={({ item }) => <TransactionDetail tx={item} />}
+                                    data={currentStock.transactions}
+                                    renderItem={({ item }) => {
+                                        const onPressDelete = () => {
+                                            const updatedTxs = currentStock.transactions.filter(tx => tx.txId != item.txId)
+                                            setCurrentStock({ ...currentStock, transactions: updatedTxs })
+                                        }
+                                        return <TransactionDetail onPressDelete={onPressDelete} tx={item} />
+                                    }
+                                    }
                                 />
                             </View>
                             <View className='mx-36'>
@@ -152,8 +198,8 @@ const AddStockDetailsModal = ({
                                             className={'text-xl font-light text-black dark:text-white'}
                                             onPress={() => setOpenDatePicker(x => true)}
                                         >
-                                            {txObject.dateMs && new Date(txObject.dateMs).toLocaleDateString()}
-                                            {!txObject.dateMs && <Text className='opacity-30'>{'DATE'}</Text>}
+                                            {txFieldObject.dateMs && new Date(txFieldObject.dateMs).toLocaleDateString()}
+                                            {!txFieldObject.dateMs && <Text className='opacity-30'>{'DATE'}</Text>}
                                         </Text>
                                     </View>
                                     <View className='flex-1 border-r border-gray-400 p-2 px-5'>
@@ -164,8 +210,8 @@ const AddStockDetailsModal = ({
                                             keyboardType='number-pad'
                                             returnKeyType='done'
                                             placeholderTextColor={placeHolderColor}
-                                            value={txObject.quantity?.toString()}
-                                            onChangeText={(text) => setTxObject({ ...txObject, quantity: text })}
+                                            value={txFieldObject.quantity?.toString()}
+                                            onChangeText={(text) => setTxFieldObject({ ...txFieldObject, quantity: text })}
                                             contextMenuHidden
                                         />
                                     </View>
@@ -177,8 +223,8 @@ const AddStockDetailsModal = ({
                                             keyboardType='decimal-pad'
                                             returnKeyType='done'
                                             placeholderTextColor={placeHolderColor}
-                                            value={txObject.buyingPrice?.toString()}
-                                            onChangeText={(text) => setTxObject({ ...txObject, buyingPrice: text })}
+                                            value={txFieldObject.buyingPrice?.toString()}
+                                            onChangeText={(text) => setTxFieldObject({ ...txFieldObject, buyingPrice: text })}
                                             contextMenuHidden
                                         />
                                     </View>
@@ -194,9 +240,15 @@ const AddStockDetailsModal = ({
                         </View>
 
                         {/* FOOTER */}
-                        <TouchableOpacity onPress={onRequestClose} className='bg-black dark:bg-slate-200 items-center rounded-xl w-[90%] py-3 mb-5'>
-                            <Text className='text-white dark:text-black text-xl font-light uppercase'>add to holdings</Text>
+                        <TouchableOpacity onPress={handleOnSaveButtonPress} className='bg-black dark:bg-slate-200 items-center rounded-xl w-[90%] py-3 mb-3'>
+                            <Text className='text-white dark:text-black text-xl font-light uppercase'>save to holdings</Text>
                         </TouchableOpacity>
+
+                        {!editable &&
+                            <TouchableOpacity onPress={handleOnDeleteButtonPress} >
+                                <Text className='text-black dark:text-white text-base font-normal uppercase'>DELETE</Text>
+                            </TouchableOpacity>
+                        }
                     </SafeAreaView>
                 </View>
 
@@ -205,10 +257,10 @@ const AddStockDetailsModal = ({
                     mode='date'
                     open={openDatePicker}
                     maximumDate={new Date()}
-                    date={new Date(txObject.dateMs ?? new Date())}
+                    date={new Date(txFieldObject.dateMs ?? new Date())}
                     onConfirm={(date) => {
                         setOpenDatePicker(x => false)
-                        setTxObject({ ...txObject, dateMs: date.valueOf() })
+                        setTxFieldObject({ ...txFieldObject, dateMs: date.valueOf() })
                     }}
                     onCancel={() => setOpenDatePicker(x => false)}
                 />

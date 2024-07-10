@@ -40,15 +40,10 @@ export const stockSelectorFamily = selectorFamily({
         const stockIndex = holdings.findIndex(stock => stock.name === stockName);
 
         if (stockIndex !== -1) {
-            // Stock found, update it
             const updatedHoldings = holdings.map((stock, index) =>
                 index === stockIndex ? { ...stock, ...newValue } : stock
             );
             set(portfolioHoldingsAtom, updatedHoldings);
-        } else {
-            // Stock not found, add it
-            const newStock: Stock = { ...newValue };
-            set(portfolioHoldingsAtom, [...holdings, newStock]);
         }
     }
 })
