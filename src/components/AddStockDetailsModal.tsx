@@ -25,9 +25,9 @@ const AddStockDetailsModal = ({
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
 
     const [openDatePicker, setOpenDatePicker] = useState(false)
-    const [currStockName, setCurrStockName] = useState(stockName ?? '')
+    const [currStockName, setCurrStockName] = useState('')
     const [currStockPrice, setCurrStockPrice] = useState('')
-    const [stock, setStock] = useRecoilState(stockSelectorFamily(stockName))
+    const [stock, setStock] = useRecoilState(stockSelectorFamily(stockName ?? currStockName))
     const [txObject, setTxObject] = useState<{
         dateMs?: number,
         quantity?: string,
@@ -37,15 +37,13 @@ const AddStockDetailsModal = ({
     const editable = (stock === undefined)
     const isTxDetailsFilled = !(!txObject.buyingPrice || !txObject.dateMs || !txObject.quantity)
 
-    useEffect(() => {
-        if (isModalVisible) clearAllFields()
-    }, [isModalVisible])
-
     const clearTxFields = () => setTxObject({})
     const clearAllFields = () => {
-        setCurrStockName('')
-        setCurrStockPrice('')
-        setTxObject({})
+        clearTxFields()
+        if (!stockName) {
+            setCurrStockName('')
+            setCurrStockPrice('')
+        }
     }
 
     const handleOnTickPress = () => {
@@ -66,6 +64,10 @@ const AddStockDetailsModal = ({
         })
         clearTxFields()
     }
+
+    useEffect(() => {
+        if (isModalVisible) clearAllFields()
+    }, [isModalVisible])
 
     useEffect(() => {
         if (stock?.name) setCurrStockName(stock.name)
