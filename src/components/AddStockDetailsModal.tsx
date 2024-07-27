@@ -31,7 +31,6 @@ const AddStockDetailsModal = ({
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
 
     // BUG: current price input field not taking decimals
-    // BUG: save non editable stock with 0 Txs
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [currentStock, setCurrentStock] = useState<Stock>(emptyStock)
     const [portfolioStock, setPortfolioStock] = useRecoilState(stockSelectorFamily(stockName ?? currentStock.name))
@@ -77,6 +76,10 @@ const AddStockDetailsModal = ({
             return
         }
         if (!editable) {
+            if (currentStock.transactions.length === 0) {
+                handleOnDeleteButtonPress()
+                return
+            }
             setPortfolioStock(currentStock)
             onRequestClose()
             return
@@ -102,6 +105,10 @@ const AddStockDetailsModal = ({
                         setPortfolioHoldings([...updatedHoldings])
                         onRequestClose()
                     }
+                },
+                {
+                    text: 'cancel',
+                    style: 'cancel'
                 }
             ]
         )
