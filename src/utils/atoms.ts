@@ -31,7 +31,7 @@ export const portfolioReturnsSeclector = selector({
         holdings.forEach(stock => {
             stock.transactions.forEach(tx => {
                 investedAmount += (tx.buyingPrice * tx.quantity);
-                currentAmount += (stock.currentPrice * tx.quantity);
+                currentAmount += (parseFloat(stock.currentPrice) * tx.quantity);
             })
         })
         const xirReturn = calculateXIRRPercentage(holdings);
@@ -69,7 +69,7 @@ export const stockReturnsSelectorFamily = selectorFamily({
         let totalQuantity = 0
         stock?.transactions.forEach(tx => {
             investedAmount += (tx.buyingPrice * tx.quantity);
-            currentAmount += (stock.currentPrice * tx.quantity);
+            currentAmount += (parseFloat(stock.currentPrice) * tx.quantity);
             totalQuantity += tx.quantity;
         })
         const xirReturn = stock ? calculateXIRRPercentage([stock]) : NaN;

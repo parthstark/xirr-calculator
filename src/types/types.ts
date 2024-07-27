@@ -7,6 +7,6 @@ export type Transaction = {
 
 export type Stock = {
     name: string,
-    currentPrice: number,
+    currentPrice: string,
     transactions: Transaction[],
 }

@@ -23,7 +23,7 @@ export const calculateXIRRPercentage = (stocks: Stock[]): number => {
     stocks.forEach(stock => {
         stock.transactions.forEach(tx => {
             xirrArray.push({
-                amount: stock.currentPrice * tx.quantity,
+                amount: parseFloat(stock.currentPrice) * tx.quantity,
                 when: new Date()
             })
         })

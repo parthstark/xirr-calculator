@@ -20,7 +20,7 @@ const TransactionDetail = ({ tx, onPressDelete }: TransactionDetailProps) => {
             </View>
             <View className='flex-1 flex-col items-end justify-end'>
                 <Text className='text-xl font-light text-black dark:text-white'>
-                    {tx.buyingPrice.toFixed(1)}
+                    {tx.buyingPrice}
                 </Text>
             </View>
             <View className='flex-[0.25] justify-center items-end mt-1 ml-[1] mr-[-1]'>

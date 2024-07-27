@@ -10,9 +10,11 @@ import { isIos } from '../utils/utils';
 import Divider from './base/Divider';
 import TransactionDetail from './base/TransactionDetail';
 
+const DECIMAL_NUMBER = /^[0-9]*\.?[0-9]*$/;
+
 const emptyStock: Stock = {
     name: '',
-    currentPrice: 0,
+    currentPrice: '',
     transactions: []
 }
 
@@ -30,7 +32,6 @@ const AddStockDetailsModal = ({
     const { colorScheme } = useColorScheme();
     const placeHolderColor = (colorScheme === 'dark') ? '#666' : undefined;
 
-    // BUG: current price input field not taking decimals
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [currentStock, setCurrentStock] = useState<Stock>(emptyStock)
     const [portfolioStock, setPortfolioStock] = useRecoilState(stockSelectorFamily(stockName ?? currentStock.name))
@@ -85,7 +86,7 @@ const AddStockDetailsModal = ({
             return
         }
 
-        const allDetailsFilled = currentStock.name.length != 0 && currentStock.currentPrice != 0 && currentStock.transactions.length != 0
+        const allDetailsFilled = currentStock.name.length != 0 && currentStock.currentPrice && currentStock.transactions.length != 0
         if (editable && allDetailsFilled) {
             setPortfolioHoldings([...portfolioHoldings, currentStock])
             onRequestClose()
@@ -125,6 +126,34 @@ const AddStockDetailsModal = ({
         }
     }
 
+    const handleNameFieldOnChangeText = (text: string) =>
+        setCurrentStock({ ...currentStock, name: text })
+
+    const handleCurrentPriceFieldOnChangeText = (text: string) => {
+        if (DECIMAL_NUMBER.test(text) || text === '') {
+            const decimalIndex = text.indexOf('.');
+            if (decimalIndex > 0 && text.length - decimalIndex > 2) {
+                setCurrentStock({ ...currentStock, currentPrice: parseFloat(text).toFixed(2) });
+            } else {
+                setCurrentStock({ ...currentStock, currentPrice: text });
+            }
+        }
+    }
+
+    const handleTxQtyOnChangeText = (text: string) =>
+        setTxFieldObject({ ...txFieldObject, quantity: parseInt(text).toString() })
+
+    const handleTxPriceOnChangeText = (text: string) => {
+        if (DECIMAL_NUMBER.test(text) || text === '') {
+            const decimalIndex = text.indexOf('.');
+            if (decimalIndex > 0 && text.length - decimalIndex > 2) {
+                setTxFieldObject({ ...txFieldObject, buyingPrice: parseFloat(text).toFixed(2) })
+            } else {
+                setTxFieldObject({ ...txFieldObject, buyingPrice: text })
+            }
+        }
+    }
+
     return (
         <Modal
             animationType='slide'
@@ -149,7 +178,7 @@ const AddStockDetailsModal = ({
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
                                     value={currentStock.name}
-                                    onChangeText={(text) => setCurrentStock({ ...currentStock, name: text })}
+                                    onChangeText={handleNameFieldOnChangeText}
                                 />
                                 {editable
                                     ? <Text className='font-extralight text-black dark:text-white'>x</Text>
@@ -165,12 +194,8 @@ const AddStockDetailsModal = ({
                                     keyboardType='number-pad'
                                     returnKeyType='done'
                                     placeholderTextColor={placeHolderColor}
-                                    value={
-                                        currentStock.currentPrice
-                                            ? currentStock.currentPrice.toString()
-                                            : ''
-                                    }
-                                    onChangeText={(text) => setCurrentStock({ ...currentStock, currentPrice: parseFloat(text) })}
+                                    value={currentStock.currentPrice}
+                                    onChangeText={handleCurrentPriceFieldOnChangeText}
                                 />
                             </View>
 
@@ -227,8 +252,8 @@ const AddStockDetailsModal = ({
                                             keyboardType='number-pad'
                                             returnKeyType='done'
                                             placeholderTextColor={placeHolderColor}
-                                            value={txFieldObject.quantity?.toString()}
-                                            onChangeText={(text) => setTxFieldObject({ ...txFieldObject, quantity: text })}
+                                            value={txFieldObject.quantity}
+                                            onChangeText={handleTxQtyOnChangeText}
                                             contextMenuHidden
                                         />
                                     </View>
@@ -240,8 +265,8 @@ const AddStockDetailsModal = ({
                                             keyboardType='decimal-pad'
                                             returnKeyType='done'
                                             placeholderTextColor={placeHolderColor}
-                                            value={txFieldObject.buyingPrice?.toString()}
-                                            onChangeText={(text) => setTxFieldObject({ ...txFieldObject, buyingPrice: text })}
+                                            value={txFieldObject.buyingPrice}
+                                            onChangeText={handleTxPriceOnChangeText}
                                             contextMenuHidden
                                         />
                                     </View>
