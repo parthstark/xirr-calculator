@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Stock } from '../types/types'
 import { useColorScheme } from 'nativewind';
 import { useRecoilState } from 'recoil';
-import { portfolioHoldingsAtom, stockSelectorFamily } from '../utils/atoms';
+import { portfolioHoldingsSelector, stockSelectorFamily } from '../utils/atoms';
 import DatePicker from 'react-native-date-picker';
 import { isIos } from '../utils/utils';
 import Divider from './base/Divider';
@@ -34,7 +34,7 @@ const AddStockDetailsModal = ({
     const [openDatePicker, setOpenDatePicker] = useState(false)
     const [currentStock, setCurrentStock] = useState<Stock>(emptyStock)
     const [portfolioStock, setPortfolioStock] = useRecoilState(stockSelectorFamily(stockName ?? currentStock.name))
-    const [portfolioHoldings, setPortfolioHoldings] = useRecoilState(portfolioHoldingsAtom)
+    const [portfolioHoldings, setPortfolioHoldings] = useRecoilState(portfolioHoldingsSelector)
     const [txFieldObject, setTxFieldObject] = useState<{
         dateMs?: number,
         quantity?: string,

@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stock } from "../types/types";
 import { HOLDINGS_LOCAL_STORAGE_KEY } from "../constants/constants";
 
-export const saveStockHoldingsToLocalStorage = async (data: Stock[]) => {
+export const saveStocksToLocalStorage = async (data: Stock[]) => {
     try {
         const value = JSON.stringify(data);
         await AsyncStorage.setItem(HOLDINGS_LOCAL_STORAGE_KEY, value);
@@ -11,7 +11,7 @@ export const saveStockHoldingsToLocalStorage = async (data: Stock[]) => {
     }
 };
 
-export const getStockHoldingsFromLocalStorage = async (): Promise<Stock[]> => {
+export const getStocksFromLocalStorage = async (): Promise<Stock[]> => {
     try {
         const value = await AsyncStorage.getItem(HOLDINGS_LOCAL_STORAGE_KEY);
         if (value) return JSON.parse(value)
@@ -21,7 +21,7 @@ export const getStockHoldingsFromLocalStorage = async (): Promise<Stock[]> => {
     return []
 };
 
-export const clearStockHoldingsFromLocalStorage = async () => {
+export const clearsFromLocalStorage = async () => {
     try {
         await AsyncStorage.removeItem(HOLDINGS_LOCAL_STORAGE_KEY);
     } catch (e) {

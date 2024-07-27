@@ -1,14 +1,25 @@
-import { atom, selector, selectorFamily } from "recoil";
+import { atom, DefaultValue, selector, selectorFamily } from "recoil";
 import { Stock } from "../types/types";
 import { calculateXIRRPercentage } from './utils';
-import { getStockHoldingsFromLocalStorage } from "./localStorage";
+import { getStocksFromLocalStorage, saveStocksToLocalStorage } from "./localStorage";
 
-export const portfolioHoldingsAtom = atom<Stock[]>({
+const portfolioHoldingsAtom = atom<Stock[]>({
     key: "portfolioHoldingsAtom",
     default: selector({
         key: 'portfolioHoldingsAtom/DefaultSelector',
-        get: async () => await getStockHoldingsFromLocalStorage()
+        get: async () => await getStocksFromLocalStorage()
     })
+})
+
+export const portfolioHoldingsSelector = selector<Stock[]>({
+    key: "portfolioHoldingsSelector",
+    get: ({ get }) => get(portfolioHoldingsAtom),
+    set: ({ set }, newValue) => {
+        set(portfolioHoldingsAtom, newValue);
+        if (!(newValue instanceof DefaultValue)) {
+            saveStocksToLocalStorage(newValue);
+        }
+    },
 })
 
 export const portfolioReturnsSeclector = selector({

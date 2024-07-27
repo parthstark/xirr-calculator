@@ -5,7 +5,7 @@ import PortfolioHoldingItem from './PortfolioHoldingItem';
 import PortfolioAtGlance from './PortfolioAtGlance';
 import AddStockDetailsModal from './AddStockDetailsModal';
 import { useRecoilValue } from 'recoil';
-import { portfolioHoldingsAtom } from '../utils/atoms';
+import { portfolioHoldingsSelector } from '../utils/atoms';
 
 interface StockModalStateData {
     open: boolean,
@@ -14,7 +14,7 @@ interface StockModalStateData {
 
 const PortfolioScreen = () => {
 
-    const stocks = useRecoilValue(portfolioHoldingsAtom)
+    const stocks = useRecoilValue(portfolioHoldingsSelector)
 
     const { toggleColorScheme } = useColorScheme();
     const [stockModalData, setStockModalData] = useState<StockModalStateData>({ open: false })
